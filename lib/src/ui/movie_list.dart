@@ -1,16 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:movie_estamp/src/blocs/detail_bloc/movie_detail_bloc.dart';
+import 'package:movie_estamp/src/blocs/movie_bloc/movie_list_bloc.dart';
 import 'package:movie_estamp/src/ui/movie_info.dart';
 import 'package:movie_estamp/src/ui/searchScreen.dart';
+import 'package:movie_estamp/src/widgets/buildListWidget.dart';
 import '../models/item_model.dart';
-import '../models/search_model.dart';
-import '../blocs/movies_bloc.dart';
-import '../blocs/search_block.dart';
 
-class MovieList extends StatelessWidget {
+class MovieList extends StatefulWidget {
+  @override
+  _MovieListState createState() => _MovieListState();
+}
+
+class _MovieListState extends State<MovieList> {
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<MovieListBloc>(context).add(CallMovieListEvent());
+  }
+
   @override
   Widget build(BuildContext context) {
-    searchBloc.fetchAllMovies();
-    bloc.fetchAllMovies();
     return Scaffold(
       appBar: AppBar(
         title: Text('Popular Movies'),
@@ -19,76 +29,30 @@ class MovieList extends StatelessWidget {
             onPressed: () => Navigator.push(
                 context, MaterialPageRoute(builder: (_) => SearchScreen()))),
       ),
-      body: StreamBuilder(
-        stream: searchBloc.allMoviesSearch,
-        // stream: bloc.allMovies,
-        // builder: (context, AsyncSnapshot<ItemModel> snapshot) {
-        builder: (context, AsyncSnapshot<SearchModel> snapshot) {
-          if (snapshot.hasData) {
-            // return buildList(snapshot);
-            return buildListSearch(snapshot);
-          } else if (snapshot.hasError) {
-            return Text(snapshot.error.toString());
-          }
-          return Center(child: CircularProgressIndicator());
-        },
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<MovieDetailBloc, MovieDetailState>(
+              listener: (ctx, state) {
+            if (state is CalledMovieDetailBlocState) {
+              final Route ruta = MaterialPageRoute(builder: (_) => MovieInfo());
+              Navigator.push(context, ruta);
+            }
+          })
+        ],
+        child: BlocBuilder<MovieListBloc, MovieListState>(
+          builder: (context, state) {
+            if (state is CalledMovieListState) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: BuildGridView(state: state.movieResponse),
+              );
+            }
+            return Center(
+              child: Text("Error"),
+            );
+          },
+        ),
       ),
-    );
-  }
-
-  Widget buildList(AsyncSnapshot<ItemModel> snapshot) {
-    return ListView.builder(
-      itemBuilder: (
-        BuildContext context,
-        int index,
-      ) {
-        return Column(
-          children: [
-            Image.network(snapshot.data?.poster),
-            ElevatedButton(
-                onPressed: () {
-                  final Route ruta = MaterialPageRoute(
-                    builder: (_) => MovieInfo(
-                      snapshot: snapshot,
-                    ),
-                  );
-                  Navigator.push(context, ruta);
-                },
-                child: Text("ver mas..."))
-          ],
-        );
-      },
-      itemCount: 10,
-    );
-  }
-
-  Widget buildListSearch(AsyncSnapshot<SearchModel> snapshot) {
-    return ListView.builder(
-      itemBuilder: (
-        BuildContext context,
-        int index,
-      ) {
-        return Column(
-          children: [
-            Text("${snapshot.data.lst[index]["Title"]}"),
-            Image.network(snapshot.data.lst[index]["Poster"]),
-            ElevatedButton(
-              onPressed: () {
-                final Route ruta = MaterialPageRoute(
-                  builder: (_) => MovieInfo(
-                    snap: snapshot.data.lst[index],
-                  ),
-                );
-                Navigator.push(context, ruta);
-              },
-              child: Text(
-                "Ver mas",
-              ),
-            )
-          ],
-        );
-      },
-      itemCount: snapshot.data.lst.length,
     );
   }
 }
