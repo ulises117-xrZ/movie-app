@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_estamp/src/blocs/detail_bloc/movie_detail_bloc.dart';
 import 'package:movie_estamp/src/models/item_model.dart';
-import 'package:movie_estamp/src/ui/movie_list.dart';
 
 class BuildGridView extends StatefulWidget {
   final MovieListResponse state;
@@ -22,6 +21,7 @@ class _BuildGridViewState extends State<BuildGridView> {
             crossAxisSpacing: 10,
             mainAxisSpacing: 10),
         shrinkWrap: true,
+        
         itemCount: widget.state.search.length,
         itemBuilder: (BuildContext ctx, index) {
           return InkWell(

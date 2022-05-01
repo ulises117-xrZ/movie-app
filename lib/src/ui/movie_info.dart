@@ -55,13 +55,22 @@ class _MovieInfoState extends State<MovieInfo> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    ' ${localState.title}',
-                                    style: GoogleFonts.lobster(
-                                      fontSize: 22,
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxWidth: 300,
+                                      minWidth: 100,
+                                    ),
+                                    child: Text(
+                                      ' ${localState.title}',
+                                      style: GoogleFonts.lobster(
+                                        fontSize: 22,
+                                      ),
                                     ),
                                   )
                                 ],
+                              ),
+                              SizedBox(
+                                height: 20,
                               ),
                               Row(
                                 mainAxisAlignment:
